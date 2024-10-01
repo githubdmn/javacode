@@ -34,7 +34,10 @@ To compile all the Java files in the `src` directory and store the compiled `.cl
 ```bash
 
 javac -d bin src/**/*.java
-
+||
+javac -d bin src/com/example/app/*.java src/com/example/utils/math/*.java src/com/example/utils/message/*.java
+||
+find src -name "*.java" | xargs javac -d bin
 ```
 
 - **`-d bin`**: Specifies that the compiled class files should be placed in the `bin` directory.
