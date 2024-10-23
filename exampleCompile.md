@@ -51,6 +51,7 @@ Once the compilation is done, you can run the main class (`App.java`) using the 
 ```bash
 
 java -classpath bin com.example.app.App
+java -classpath bin main.java.com.example.app.App 
 
 ```
 
