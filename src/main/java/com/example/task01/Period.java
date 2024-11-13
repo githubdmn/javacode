@@ -15,6 +15,12 @@ class Period {
 		this.isAltered = false;
 	}
 
+	public Period(String startDate, String endDate, boolean isAltered) {
+		this.startDate = LocalDate.parse(startDate, formatter);
+		this.endDate = LocalDate.parse(endDate, formatter);
+		this.isAltered = isAltered;
+	}
+
 	public LocalDate getStartDate() {
 		return startDate;
 	}
@@ -28,7 +34,15 @@ class Period {
 	}
 
 	public boolean isOverlappingWith(Period other) {
-		return !this.endDate.isBefore(other.startDate) && !this.startDate.isAfter(other.endDate);
+		return this.startDate.isBefore(other.endDate) && this.endDate.isAfter(other.startDate);
+	}
+
+	public boolean isStartingIn(Period other) {
+		return this.startDate.isBefore(other.endDate);
+	}
+
+	public boolean isEndingIn(Period other) {
+		return this.endDate.isAfter(other.startDate);
 	}
 
 	public boolean isCoveringWith(Period other) {

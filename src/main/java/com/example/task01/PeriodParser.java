@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
 class PeriodParser {
@@ -84,42 +83,48 @@ class PeriodParser {
 		return mergedPeriods;
 	}
 
-	public static List<Period> mergeAndFindOverlaps(List<Period> periodsFromFile1, List<Period> periodsFromFile2) {
-		List<Period> result = new ArrayList<>();
-		List<Period> allPeriods = new ArrayList<>(periodsFromFile1);
-		allPeriods.addAll(periodsFromFile2);
+	public static List<Period> findAndSplitOverlaps(List<Period> list1, List<Period> list2) {
+		List<Period> allPeriods = new ArrayList<>(list1);
+		allPeriods.addAll(list2);
 		allPeriods.sort(Comparator.comparing(Period::getStartDate));
 
-		Iterator<Period> currentPeriod = periodsFromFile1.iterator();
+		List<Period> result = new ArrayList<>();
+		Period current = allPeriods.get(0);
 
-		while (currentPeriod.hasNext()) {
-			Period tmp = currentPeriod.next();
-			System.out.println(tmp.toString() + " dasf  " + currentPeriod.toString());
+		for (int i = 1; i < allPeriods.size(); i++) {
+			Period next = allPeriods.get(i);
+
+			if (current.isOverlappingWith(next)) {
+				// Case 1: Overlap detected, split intervals
+				LocalDate overlapStart = next.getStartDate();
+				LocalDate overlapEnd = current.getEndDate().isBefore(next.getEndDate()) ? current.getEndDate()
+						: next.getEndDate();
+
+				// First part before the overlap
+				Period beforeOverlap = new Period(current.getStartDate(), overlapStart.minusDays(1));
+				beforeOverlap.markAsAltered();
+				result.add(beforeOverlap);
+
+				// Middle overlapping part
+				result.add(new Period(next.getStartDate(), next.getEndDate()));
+
+				// Update current for potential further overlaps
+				if (next.getEndDate().isAfter(current.getEndDate())) {
+					current = new Period(overlapEnd.plusDays(1), next.getEndDate());
+					current.markAsAltered();
+				} else {
+					current = new Period(overlapEnd.plusDays(1), current.getEndDate());
+					current.markAsAltered();
+				}
+			} else {
+				// Case 2: No overlap, add current and move to the next
+				result.add(current);
+				current = next;
+			}
 		}
+		// Add the last remaining period
+		result.add(current);
 
-		// for (Period period : allPeriods) {
-		// if (currentPeriod == null) {
-		// currentPeriod = period;
-		// } else if (period.isOverlappingWith(period)) {
-		// LocalDate startDate =
-		// currentPeriod.getStartDate().isBefore(period.getStartDate())
-		// ? currentPeriod.getStartDate()
-		// : period.getStartDate();
-		// LocalDate endDate = currentPeriod.getEndDate().isAfter(period.getEndDate())
-		// ? currentPeriod.getEndDate()
-		// : period.getEndDate();
-		// currentPeriod = new Period(startDate, endDate);
-		// currentPeriod.markAsAltered();
-		// } else {
-		// result.add(currentPeriod);
-		// currentPeriod = period;
-		// }
-		// }
-
-		// if (currentPeriod != null) {
-		// result.add(currentPeriod);
-		// }
 		return result;
 	}
-
 }

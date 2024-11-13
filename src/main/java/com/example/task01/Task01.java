@@ -17,7 +17,7 @@ public class Task01 {
 		System.out.println("\nPeriods from " + file2 + ":");
 		periodsFromFile2.forEach(System.out::println);
 
-		List<Period> mergedPeriods = PeriodParser.mergeAndFindOverlaps(periodsFromFile1, periodsFromFile2);
+		List<Period> mergedPeriods = PeriodParser.findAndSplitOverlaps(periodsFromFile1, periodsFromFile2);
 
 		System.out.println("\nMerged and processed periods:");
 		mergedPeriods.forEach(System.out::println);
