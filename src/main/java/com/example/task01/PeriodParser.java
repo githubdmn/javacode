@@ -110,8 +110,9 @@ class PeriodParser {
 				break;
 			}
 
-			if (!result.isEmpty() && result.getLast().isContaining(current)) {
+			if (!result.isEmpty() && result.getLast().getEndDate().isAfter(current.getEndDate())) {
 				result.removeLast();
+				break;
 			}
 
 			if (current.isOverlappingWith(next)) {
@@ -121,6 +122,11 @@ class PeriodParser {
 					result.add(beforeOverlap);
 					result.add(next);
 				}
+
+				if (next.getEndDate().isAfter(nextnext.getEndDate())) {
+					break;
+				}
+
 				if (next.isEndingIn(nextnext)) {
 					Period afterOverlap = new Period(next.getEndDate().plusDays(1), nextnext.getEndDate(),
 							true);
@@ -135,27 +141,3 @@ class PeriodParser {
 		return result;
 	}
 }
-
-/*
- * Merged and processed periods:
- * 18-03-1992 - 09-02-1994*
- * 10-02-1994 - 20-10-1995
- * 10-02-1994 - 20-10-1995
- * 01-06-2002 - 01-08-2003
- * 01-08-2003 - 25-12-2005
- * 26-12-2005 - 06-12-2006*
- * 07-12-2006 - 05-01-2014
- * 06-01-2014 - 15-07-2015*
- * 07-12-2006 - 14-06-2013*
- * 15-06-2013 - 15-07-2015
- * 
- * 18-03-1992 - 09-02-1994*
- * 10-02-1994 - 20-10-1995
- * 10-02-1994 - 20-10-1995
- * 01-06-2002 - 01-08-2003
- * 01-08-2003 - 25-12-2005
- * 26-12-2005 - 06-12-2006*
- * 07-12-2006 - 05-01-2014
- * 06-01-2014 - 15-07-2015*
- * 
- */
