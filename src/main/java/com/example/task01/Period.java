@@ -9,16 +9,22 @@ class Period {
 	private boolean isAltered;
 	private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
 
+	public Period(LocalDate startDate, LocalDate endDate, boolean isAltered) {
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.isAltered = isAltered;
+	}
+
 	public Period(LocalDate startDate, LocalDate endDate) {
 		this.startDate = startDate;
 		this.endDate = endDate;
 		this.isAltered = false;
 	}
 
-	public Period(String startDate, String endDate, boolean isAltered) {
-		this.startDate = LocalDate.parse(startDate, formatter);
-		this.endDate = LocalDate.parse(endDate, formatter);
-		this.isAltered = isAltered;
+	public Period(Period period) {
+		this.startDate = period.startDate;
+		this.endDate = period.endDate;
+		this.isAltered = period.isAltered;
 	}
 
 	public LocalDate getStartDate() {
@@ -45,12 +51,16 @@ class Period {
 		return this.endDate.isAfter(other.startDate);
 	}
 
-	public boolean isCoveringWith(Period other) {
-		return !this.startDate.isAfter(other.startDate) && !this.endDate.isBefore(other.endDate);
+	public boolean isContaining(Period other) {
+		return !this.startDate.isBefore(other.startDate) && !this.endDate.isAfter(other.endDate);
 	}
 
 	public void markAsAltered() {
 		this.isAltered = true;
+	}
+
+	public boolean isAltered() {
+		return isAltered;
 	}
 
 	@Override

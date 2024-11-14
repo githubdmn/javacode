@@ -88,43 +88,74 @@ class PeriodParser {
 		allPeriods.addAll(list2);
 		allPeriods.sort(Comparator.comparing(Period::getStartDate));
 
+		// print alll periods
+		System.out.println("\n All periods:");
+		for (Period period : allPeriods) {
+			System.out.println(period);
+		}
+
 		List<Period> result = new ArrayList<>();
 		Period current = allPeriods.get(0);
 
 		for (int i = 1; i < allPeriods.size(); i++) {
 			Period next = allPeriods.get(i);
+			Period nextnext;
+			if (i < allPeriods.size() - 1) {
+				nextnext = allPeriods.get(i + 1);
+			} else {
+				nextnext = null;
+			}
+
+			if (nextnext == null) {
+				break;
+			}
+
+			if (!result.isEmpty() && result.getLast().isContaining(current)) {
+				result.removeLast();
+			}
 
 			if (current.isOverlappingWith(next)) {
-				// Case 1: Overlap detected, split intervals
-				LocalDate overlapStart = next.getStartDate();
-				LocalDate overlapEnd = current.getEndDate().isBefore(next.getEndDate()) ? current.getEndDate()
-						: next.getEndDate();
-
-				// First part before the overlap
-				Period beforeOverlap = new Period(current.getStartDate(), overlapStart.minusDays(1));
-				beforeOverlap.markAsAltered();
-				result.add(beforeOverlap);
-
-				// Middle overlapping part
-				result.add(new Period(next.getStartDate(), next.getEndDate()));
-
-				// Update current for potential further overlaps
-				if (next.getEndDate().isAfter(current.getEndDate())) {
-					current = new Period(overlapEnd.plusDays(1), next.getEndDate());
-					current.markAsAltered();
-				} else {
-					current = new Period(overlapEnd.plusDays(1), current.getEndDate());
-					current.markAsAltered();
+				if (next.isStartingIn(current)) {
+					Period beforeOverlap = new Period(current.getStartDate(),
+							next.getStartDate().minusDays(1), true);
+					result.add(beforeOverlap);
+					result.add(next);
+				}
+				if (next.isEndingIn(nextnext)) {
+					Period afterOverlap = new Period(next.getEndDate().plusDays(1), nextnext.getEndDate(),
+							true);
+					result.add(afterOverlap);
 				}
 			} else {
-				// Case 2: No overlap, add current and move to the next
 				result.add(current);
-				current = next;
 			}
+			current = next;
 		}
-		// Add the last remaining period
-		result.add(current);
 
 		return result;
 	}
 }
+
+/*
+ * Merged and processed periods:
+ * 18-03-1992 - 09-02-1994*
+ * 10-02-1994 - 20-10-1995
+ * 10-02-1994 - 20-10-1995
+ * 01-06-2002 - 01-08-2003
+ * 01-08-2003 - 25-12-2005
+ * 26-12-2005 - 06-12-2006*
+ * 07-12-2006 - 05-01-2014
+ * 06-01-2014 - 15-07-2015*
+ * 07-12-2006 - 14-06-2013*
+ * 15-06-2013 - 15-07-2015
+ * 
+ * 18-03-1992 - 09-02-1994*
+ * 10-02-1994 - 20-10-1995
+ * 10-02-1994 - 20-10-1995
+ * 01-06-2002 - 01-08-2003
+ * 01-08-2003 - 25-12-2005
+ * 26-12-2005 - 06-12-2006*
+ * 07-12-2006 - 05-01-2014
+ * 06-01-2014 - 15-07-2015*
+ * 
+ */
