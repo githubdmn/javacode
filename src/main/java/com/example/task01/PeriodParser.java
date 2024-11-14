@@ -34,53 +34,70 @@ class PeriodParser {
 		periods.sort(Comparator.comparing(Period::getStartDate));
 	}
 
-	public static List<Period> mergeAndProcessPeriods(List<Period> periodsFromFile1, List<Period> periodsFromFile2) {
-		List<Period> mergedPeriods = new ArrayList<>();
-		int i = 0, j = 0;
+	public static List<Period> mergeAndProcessPeriods(List<Period> periods1, List<Period> periods2) {
+		List<Period> adjustedPeriods = new ArrayList<>();
 
-		while (i < periodsFromFile1.size() || j < periodsFromFile2.size()) {
-			Period current;
+		for (Period period1 : periods1) {
+			boolean hasOverlap = false;
 
-			// Determine the current period to consider
-			if (i < periodsFromFile1.size() && (j >= periodsFromFile2.size()
-					|| periodsFromFile1.get(i).getStartDate().isBefore(periodsFromFile2.get(j).getStartDate()))) {
-				current = periodsFromFile1.get(i++);
-			} else {
-				current = periodsFromFile2.get(j++);
+			for (Period period2 : periods2) {
+				if (period1.getEndDate().isBefore(period2.getStartDate())
+						|| period1.getStartDate().isAfter(period2.getEndDate())) {
+					continue;
+				}
+
+				hasOverlap = true;
+
+				if (period1.getStartDate().isBefore(period2.getStartDate())) {
+					adjustedPeriods
+							.add(new Period(period1.getStartDate(), period2.getStartDate().minusDays(1), true));
+				}
+
+				adjustedPeriods.add(new Period(period2.getStartDate(), period2.getEndDate()));
+
+				if (period1.getEndDate().isAfter(period2.getEndDate())) {
+					period1 = new Period(period2.getEndDate().plusDays(1), period1.getEndDate(), true);
+				} else {
+					period1 = null;
+					break;
+				}
 			}
 
-			// Handle merging or adding current period based on overlap
-			if (!mergedPeriods.isEmpty()) {
-				Period last = mergedPeriods.get(mergedPeriods.size() - 1);
-
-				// Case 1: No overlap (no merge)
-				if (last.getEndDate().isBefore(current.getStartDate())) {
-					mergedPeriods.add(current); // No merge, separate periods
-				}
-				// Case 2: Complete overlap (merge into one)
-				else if (last.getStartDate().isBefore(current.getStartDate())
-						&& last.getEndDate().isAfter(current.getEndDate())) {
-					// Last period completely overlaps current, no merge needed, just continue
-				}
-				// Case 3: Partial overlap (merge the periods)
-				else if (last.getEndDate().isAfter(current.getStartDate())
-						|| last.getStartDate().isBefore(current.getEndDate())) {
-					// Partial overlap, merge the periods
-					LocalDate startDate = last.getStartDate().isBefore(current.getStartDate())
-							? last.getStartDate()
-							: current.getStartDate();
-					LocalDate endDate = last.getEndDate().isAfter(current.getEndDate()) ? last.getEndDate()
-							: current.getEndDate();
-					Period mergedPeriod = new Period(startDate, endDate);
-					mergedPeriod.markAsAltered(); // Mark as merged/altered
-					mergedPeriods.set(mergedPeriods.size() - 1, mergedPeriod); // Replace last period with merged
-				}
-			} else {
-				mergedPeriods.add(current); // Add first period directly
+			if (!hasOverlap && period1 != null) {
+				adjustedPeriods.add(period1);
+			} else if (hasOverlap && period1 != null) {
+				adjustedPeriods.add(period1);
 			}
 		}
 
-		return mergedPeriods;
+		for (Period period2 : periods2) {
+			boolean hasOverlap = false;
+			for (Period period1 : periods1) {
+				if (!(period2.getEndDate().isBefore(period1.getStartDate())
+						|| period2.getStartDate().isAfter(period1.getEndDate()))) {
+					hasOverlap = true;
+					break;
+				}
+			}
+			if (!hasOverlap) {
+				adjustedPeriods.add(period2);
+			}
+		}
+
+		return adjustedPeriods;
+	}
+
+	public static List<Period> removeDuplicates(List<Period> periods) {
+		periods.sort(Comparator.comparing(Period::getStartDate).thenComparing(Period::getEndDate));
+		for (int i = 0; i < periods.size() - 1; i++) {
+			Period current = periods.get(i);
+			Period next = periods.get(i + 1);
+			if (current.getStartDate().equals(next.getStartDate())) {
+				periods.remove(next);
+				i--;
+			}
+		}
+		return periods;
 	}
 
 	public static List<Period> findAndSplitOverlaps(List<Period> list1, List<Period> list2) {

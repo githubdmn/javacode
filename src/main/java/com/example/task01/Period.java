@@ -64,12 +64,18 @@ class Period {
 	}
 
 	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (o == null || getClass() != o.getClass())
+			return false;
+		Period period = (Period) o;
+		return startDate.equals(period.startDate) && endDate.equals(period.endDate);
+	}
+
+	@Override
 	public String toString() {
-		if (isAltered) {
-			return startDate.format(formatter) + " - " + endDate.format(formatter) + "*";
-		} else {
-			return startDate.format(formatter) + " - " + endDate.format(formatter);
-		}
+		return startDate.format(formatter) + " - " + endDate.format(formatter) + (isAltered ? "*" : "");
 	}
 
 }
