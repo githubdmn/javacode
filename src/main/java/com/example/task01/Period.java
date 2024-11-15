@@ -16,15 +16,11 @@ class Period {
 	}
 
 	public Period(LocalDate startDate, LocalDate endDate) {
-		this.startDate = startDate;
-		this.endDate = endDate;
-		this.isAltered = false;
+		this(startDate, endDate, false);
 	}
 
 	public Period(Period period) {
-		this.startDate = period.startDate;
-		this.endDate = period.endDate;
-		this.isAltered = period.isAltered;
+		this(period.startDate, period.endDate, period.isAltered);
 	}
 
 	public LocalDate getStartDate() {
@@ -35,12 +31,16 @@ class Period {
 		this.endDate = endDate;
 	}
 
+	public void setStartDate(LocalDate startDate) {
+		this.startDate = startDate;
+	}
+
 	public LocalDate getEndDate() {
 		return endDate;
 	}
 
 	public boolean isOverlappingWith(Period other) {
-		return this.startDate.isBefore(other.endDate) && this.endDate.isAfter(other.startDate);
+		return !this.endDate.isBefore(other.startDate) && !this.startDate.isAfter(other.endDate);
 	}
 
 	public boolean isStartingIn(Period other) {
@@ -70,7 +70,7 @@ class Period {
 		if (o == null || getClass() != o.getClass())
 			return false;
 		Period period = (Period) o;
-		return startDate.equals(period.startDate) && endDate.equals(period.endDate);
+		return startDate.equals(period.startDate) && endDate.equals(period.endDate) && isAltered == period.isAltered;
 	}
 
 	@Override

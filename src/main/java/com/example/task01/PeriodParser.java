@@ -87,19 +87,6 @@ class PeriodParser {
 		return adjustedPeriods;
 	}
 
-	public static List<Period> removeDuplicates(List<Period> periods) {
-		periods.sort(Comparator.comparing(Period::getStartDate).thenComparing(Period::getEndDate));
-		for (int i = 0; i < periods.size() - 1; i++) {
-			Period current = periods.get(i);
-			Period next = periods.get(i + 1);
-			if (current.getStartDate().equals(next.getStartDate())) {
-				periods.remove(next);
-				i--;
-			}
-		}
-		return periods;
-	}
-
 	public static List<Period> findAndSplitOverlaps(List<Period> list1, List<Period> list2) {
 		List<Period> allPeriods = new ArrayList<>(list1);
 		allPeriods.addAll(list2);
@@ -157,4 +144,40 @@ class PeriodParser {
 
 		return result;
 	}
+
+	public static List<Period> removeDuplicates(List<Period> periods) {
+		periods.sort(Comparator.comparing(Period::getStartDate).thenComparing(Period::getEndDate));
+		for (int i = 0; i < periods.size() - 1; i++) {
+			Period current = periods.get(i);
+			Period next = periods.get(i + 1);
+			if (current.getStartDate().equals(next.getStartDate())) {
+				periods.remove(next);
+				i--;
+			}
+		}
+		return periods;
+	}
+
+	// TODO: fix this
+	// https://javaconceptoftheday.com/merge-two-sorted-arrays-in-java/
+	public static List<Period> mergeAndProcessPeriodsOptimised(List<Period> periods1, List<Period> periods2) {
+		List<Period> adjustedPeriods = new ArrayList<>();
+		int i = 0, j = 0;
+
+		while (i < periods1.size() && j < periods2.size()) {
+			Period period1 = periods1.get(i);
+			Period period2 = periods2.get(j);
+
+		}
+
+		while (i < periods1.size()) {
+			adjustedPeriods.add(periods1.get(i++));
+		}
+		while (j < periods2.size()) {
+			adjustedPeriods.add(periods2.get(j++));
+		}
+
+		return adjustedPeriods;
+	}
+
 }
