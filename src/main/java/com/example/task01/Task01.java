@@ -53,6 +53,14 @@ public class Task01 {
 
 		System.out.println("Starting Dates: " + startingList2);
 		System.out.println("Ending Dates: " + endingList2);
+
+		List<Period> mergedPeriods = DateParser.adjustPeriods(startingList1, endingList1);
+
+		// Output the merged periods
+		System.out.println("Merged Periods:");
+		for (Period period : mergedPeriods) {
+			System.out.println(period);
+		}
 	}
 
 }

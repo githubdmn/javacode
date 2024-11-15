@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DateParser {
@@ -26,5 +27,35 @@ public class DateParser {
 		} catch (IOException e) {
 			System.err.println("Error reading file: " + e.getMessage());
 		}
+	}
+
+	public static List<Period> adjustPeriods(List<LocalDate> startingList, List<LocalDate> endingList) {
+		List<Period> mergedPeriods = new ArrayList<>();
+
+		for (int i = 0; i < startingList.size(); i++) {
+			LocalDate start = startingList.get(i);
+			LocalDate end = endingList.get(i);
+
+			// If mergedPeriods is empty, add the first period
+			if (mergedPeriods.isEmpty()) {
+				mergedPeriods.add(new Period(start, end));
+				continue;
+			}
+
+			// Check for overlap with the last merged period
+			Period lastPeriod = mergedPeriods.get(mergedPeriods.size() - 1);
+			if (!start.isAfter(lastPeriod.getEndDate())) {
+				// There is overlap, so adjust the end date of the last period
+				lastPeriod.setEndDate(start.minusDays(1)); // Adjust previous period end date
+
+				// Add the current period as a new period
+				mergedPeriods.add(new Period(start, end));
+			} else {
+				// No overlap, simply add the current period
+				mergedPeriods.add(new Period(start, end));
+			}
+		}
+
+		return mergedPeriods;
 	}
 }
