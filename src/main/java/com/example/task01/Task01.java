@@ -33,34 +33,31 @@ public class Task01 {
 	}
 
 	public static void runSecondImplementation(String file1, String file2) {
-		List<LocalDate> startingList1 = new ArrayList<>();
-		List<LocalDate> endingList1 = new ArrayList<>();
+		List<Period> periodsFromFile1 = PeriodParser.parsePeriodsFromFile(file1);
+		List<Period> periodsFromFile2 = PeriodParser.parsePeriodsFromFile(file2);
 
-		List<LocalDate> startingList2 = new ArrayList<>();
-		List<LocalDate> endingList2 = new ArrayList<>();
+		PeriodParser.sortPeriods(periodsFromFile1);
+		PeriodParser.sortPeriods(periodsFromFile2);
 
-		DateParser.loadPeriodsFromFile(file1, startingList1, endingList1);
-		DateParser.loadPeriodsFromFile(file2, startingList2, endingList2);
+		// System.out.println("\n\nPeriods from " + file1 + ":");
+		// periodsFromFile1.forEach(System.out::println);
 
-		Collections.sort(startingList1);
-		Collections.sort(endingList1);
+		// System.out.println("\nPeriods from " + file2 + ":");
+		// periodsFromFile2.forEach(System.out::println);
 
-		Collections.sort(startingList2);
-		Collections.sort(endingList2);
+		DateLists lists1 = DateParser.splitPeriods(periodsFromFile1);
+		DateLists lists2 = DateParser.splitPeriods(periodsFromFile2);
 
-		System.out.println("Starting Dates: " + startingList1);
-		System.out.println("Ending Dates: " + endingList1);
+		// System.out.println(lists1.getStartingDates());
+		// System.out.println(lists1.getEndingDates());
 
-		System.out.println("Starting Dates: " + startingList2);
-		System.out.println("Ending Dates: " + endingList2);
+		// System.out.println(lists2.getStartingDates());
+		// System.out.println(lists2.getEndingDates());
 
-		List<Period> mergedPeriods = DateParser.adjustPeriods(startingList1, endingList1);
+		List<Period> mergedPeriods = DateParser.adjustPeriods(lists1.getStartingDates(), lists1.getEndingDates(),
+				lists2.getStartingDates(), lists2.getEndingDates());
 
-		// Output the merged periods
-		System.out.println("Merged Periods:");
-		for (Period period : mergedPeriods) {
-			System.out.println(period);
-		}
+		System.out.println(mergedPeriods.toString());
 	}
 
 }
